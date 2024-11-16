@@ -25,3 +25,9 @@
     background-color: #f9f9f9;
   }
 }
+
+textarea {
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: scroll;
+}

@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { saveAs } from 'file-saver'
 import { xmfa2paf } from './xmfa2paf'
 import { parseSmallFasta } from './parseSmallFasta'
 
@@ -9,6 +10,14 @@ function App() {
   const [val, setVal] = useState('')
   return (
     <div>
+      <h1>XMFA to PAF</h1>
+      <div>
+        Converts XMFA from progressiveMauve for example to PAF. Only works with
+        two sequences currently and does NOT "work" with multi-FASTA e.g. where
+        the sequences you align contains multiple chromosomes (Mauve handles
+        this by concatenating the multi-FASTA chromosomes into a single long
+        sequence, and we can't really split this back very well)
+      </div>
       <form
         onSubmit={event => {
           event.preventDefault()
@@ -55,7 +64,6 @@ function App() {
           })()
         }}
       >
-        <div>XMFA to PAF</div>
         <div>
           <label htmlFor="xmfa">XMFA: </label>
           <input ref={xmfa} type="file" id="xmfa" />
@@ -68,9 +76,31 @@ function App() {
           <label htmlFor="f2">FASTA 2: </label>
           <input ref={f2} type="file" id="f2" />
         </div>
-        <input type="submit">Submit</input>
+        <input type="submit" value="Submit" />
       </form>
-      <div>{val ? <textarea value={val} readOnly /> : null}</div>
+      <div style={{ marginTop: 100 }}>
+        {!val ? (
+          <div style={{ color: '#ccc' }}>
+            Will be populated once you submit form...
+          </div>
+        ) : null}
+        <div>
+          <button
+            disabled={!val}
+            onClick={() => {
+              saveAs(
+                new Blob([val], {
+                  type: 'text/plain;charset=utf-8',
+                }),
+                'out.paf',
+              )
+            }}
+          >
+            Save file...
+          </button>
+        </div>
+        <textarea disabled={!val} value={val} readOnly rows={100} cols={150} />
+      </div>
     </div>
   )
 }

@@ -36,7 +36,7 @@ for (const row of lcbs) {
       row.qlen,
       row.qstart,
       row.qend,
-      row.strand,
+      row.strand === -1 ? '-' : '+',
       row.tname,
       row.tlen,
       row.tstart,

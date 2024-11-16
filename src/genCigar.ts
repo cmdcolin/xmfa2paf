@@ -17,9 +17,9 @@ export function genCigar(ref: string, qry: string) {
     if (r === q) {
       op = '='
     } else if (r === '-') {
-      op = 'I'
-    } else if (q === '-') {
       op = 'D'
+    } else if (q === '-') {
+      op = 'I'
     } else {
       op = 'X'
     }

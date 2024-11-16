@@ -28,4 +28,23 @@ const ret = yargs(hideBin(process.argv))
 const data = fs.readFileSync(ret.xmfa, 'utf8')
 const f1 = parseSmallFasta(fs.readFileSync(ret.fasta1, 'utf8'))
 const f2 = parseSmallFasta(fs.readFileSync(ret.fasta2, 'utf8'))
-console.log(xmfa2paf(data.split('\n').filter(f => !!f)))
+const { lcbs } = xmfa2paf(data.split('\n'), [f1, f2])
+for (const row of lcbs) {
+  console.log(
+    [
+      row.qname,
+      row.qlen,
+      row.qstart,
+      row.qend,
+      row.strand,
+      row.tname,
+      row.tlen,
+      row.tstart,
+      row.tend,
+      1,
+      1,
+      1,
+      `cg:Z:${row.CIGAR}`,
+    ].join('\t'),
+  )
+}

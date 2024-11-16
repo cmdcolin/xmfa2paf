@@ -18,7 +18,7 @@ export function xmfa2paf(lines: string[], fastas: FastaSequence[][]) {
   const header = [] as string[]
   for (const line of lines) {
     const c = line.charAt(0)
-    if (c === '=') {
+    if (line.length === 0 || c === '=') {
       if (currentSeq && currentSeq.start !== 0 && currentSeq.end !== 0) {
         lcb.push(currentSeq)
         if (Object.keys(currentSeq).length !== 0) {
@@ -63,20 +63,26 @@ export function xmfa2paf(lines: string[], fastas: FastaSequence[][]) {
       .map(lcb => {
         const q = lcb[0]
         const t = lcb[1]
-        const r1 = findRefName(q.start, q.end, fastas[q.idx])
-        const r2 = findRefName(q.start, q.end, fastas[t.idx])
-        return r1 && r2
-          ? {
-              qname: r1.refName,
-              qstart: r1.start,
-              qend: r1.end,
-              strand: lcb[0].strand !== lcb[1].strand ? -1 : 1,
-              tname: r2.refName,
-              tstart: r2.start,
-              end: r2.end,
-              CIGAR: genCigar(q.seq, t.seq),
-            }
-          : undefined
+        if (q && t) {
+          const r1 = findRefName(q.start, q.end, fastas[q.idx - 1])
+          const r2 = findRefName(t.start, t.end, fastas[t.idx - 1])
+          return r1 && r2
+            ? {
+                qname: r1.refName,
+                qstart: r1.start,
+                qend: r1.end,
+                qlen: r1.totalLen,
+                strand: lcb[0].strand !== lcb[1].strand ? -1 : 1,
+                tlen: r2.totalLen,
+                tname: r2.refName,
+                tstart: r2.start,
+                tend: r2.end,
+                CIGAR: genCigar(q.seq, t.seq),
+              }
+            : undefined
+        } else {
+          return undefined
+        }
       })
       .filter(f => !!f),
     header,
@@ -90,6 +96,7 @@ function findRefName(start: number, end: number, entries: FastaSequence[]) {
         refName: entries[i].id,
         start: start - entries[i].start,
         end: end - entries[i].start,
+        totalLen: entries[i].sequence.length,
       }
     }
   }

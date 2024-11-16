@@ -17,6 +17,7 @@ export function parseSmallFasta(text: string) {
       const sequence = seqLines.join('').replace(/\s/g, '')
       const start = cumulativeLen
       const end = cumulativeLen + sequence.length
+      cumulativeLen += sequence.length
       return {
         id,
         description: description.join(' '),

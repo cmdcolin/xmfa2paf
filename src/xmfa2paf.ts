@@ -1,4 +1,6 @@
 import { genCigar } from './genCigar'
+import { FastaSequence } from './parseSmallFasta'
+import { doesIntersect2 } from './range'
 
 export interface Entry {
   seq: string
@@ -8,7 +10,7 @@ export interface Entry {
   end: number
 }
 
-export function xmfa2paf(lines: string[]) {
+export function xmfa2paf(lines: string[], fastas: FastaSequence[][]) {
   let seqCount = 0
   let lcb = [] as Entry[]
   let currentSeq = undefined as Entry | undefined
@@ -57,16 +59,39 @@ export function xmfa2paf(lines: string[]) {
   }
 
   return {
-    lcbs: lcbs.map(lcb => {
-      const r1 = lcb[0].seq
-      const r2 = lcb[1].seq
-      const cigar = genCigar(r1, r2)
-      console.log({ cigar })
-      return lcb
-    }),
+    lcbs: lcbs
+      .map(lcb => {
+        const q = lcb[0]
+        const t = lcb[1]
+        const r1 = findRefName(q.start, q.end, fastas[q.idx])
+        const r2 = findRefName(q.start, q.end, fastas[t.idx])
+        return r1 && r2
+          ? {
+              qname: r1.refName,
+              qstart: r1.start,
+              qend: r1.end,
+              strand: lcb[0].strand !== lcb[1].strand ? -1 : 1,
+              tname: r2.refName,
+              tstart: r2.start,
+              end: r2.end,
+              CIGAR: genCigar(q.seq, t.seq),
+            }
+          : undefined
+      })
+      .filter(f => !!f),
     header,
   }
 }
 
-const data = fs.readFileSync(process.argv[2], 'utf8')
-console.log(xmfa2paf(data.split('\n').filter(f => !!f)).lcbs[0])
+function findRefName(start: number, end: number, entries: FastaSequence[]) {
+  for (let i = 0; i < entries.length; i++) {
+    if (doesIntersect2(start, end, entries[i].start, entries[i].end)) {
+      return {
+        refName: entries[i].id,
+        start: start - entries[i].start,
+        end: end - entries[i].start,
+      }
+    }
+  }
+  return undefined
+}

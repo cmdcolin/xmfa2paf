@@ -2,22 +2,61 @@ import { useRef, useState } from 'react'
 import { saveAs } from 'file-saver'
 import { xmfa2paf } from './xmfa2paf'
 import { parseSmallFasta } from './parseSmallFasta'
+import k1 from './img/mauve.png'
+import k2 from './img/converter.png'
+import k3 from './img/import_jbrowse.png'
+import k4 from './img/result.png'
 
 function App() {
   const xmfa = useRef<HTMLInputElement>(null)
   const f1 = useRef<HTMLInputElement>(null)
   const f2 = useRef<HTMLInputElement>(null)
   const [val, setVal] = useState('')
+  const [showHelp, setShowHelp] = useState(false)
   return (
     <div>
       <h1>XMFA to PAF</h1>
       <div>
-        Converts XMFA from progressiveMauve for example to PAF. Only works with
-        two sequences currently and does NOT "work" with multi-FASTA e.g. where
-        the sequences you align contains multiple chromosomes (Mauve handles
-        this by concatenating the multi-FASTA chromosomes into a single long
-        sequence, and we can't really split this back very well)
+        <div>
+          Converts XMFA from progressiveMauve for example to PAF. Limitations:
+        </div>
+        <ul>
+          <li>Only works with two sequences currently</li>
+          <li>
+            Does NOT "work" with multi-FASTA e.g. where the sequences you align
+            contains multiple chromosomes (Mauve handles this by concatenating
+            the multi-FASTA chromosomes into a single long sequence, and we
+            can't really split this back very well)
+          </li>
+        </ul>
       </div>
+      <button onClick={() => setShowHelp(!showHelp)}>Show help</button>
+      {showHelp ? (
+        <div style={{ background: '#333', padding: 100 }}>
+          <div>
+            Here is a series of screenshots showing usage. Note that the "order
+            of genomes" matters in several of these steps (e.g. the mauve import
+            form, this converters FASTA1 and FASTA2, the jbrowse import form,
+            etc.):
+          </div>
+          <div style={{ margin: 100, padding: 50, background: '#555' }}>
+            <h1>Step 1.Use Mauve</h1>
+            <img src={k1} />
+          </div>
+          <div style={{ margin: 100, padding: 50, background: '#555' }}>
+            <h1>Step 2.Use this converter tool</h1>
+            <img src={k2} />
+          </div>
+          <div style={{ margin: 100, padding: 50, background: '#555' }}>
+            <h1>Step 3.Load in JBrowse</h1>
+            <img src={k3} />
+          </div>
+          <div style={{ margin: 100, padding: 50, background: '#555' }}>
+            <h1>Step 4.See results</h1>
+            <img src={k4} />
+          </div>
+        </div>
+      ) : null}
       <form
         onSubmit={event => {
           event.preventDefault()
